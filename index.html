@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AiDocGen — AI Document Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #7C3AED;
+            --primary-hover: #6D28D9;
+            --bg: #FFFFFF;
+            --text: #111827;
+            --text-muted: #6B7280;
+            --border: #E5E7EB;
+            --error: #EF4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F9FAFB;
+            color: var(--text);
+            line-height: 1.5;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            color: var(--text);
+        }
+
+        .logo span {
+            color: var(--primary);
+        }
+
+        .tagline {
+            color: var(--text-muted);
+            font-size: 1.125rem;
+            margin-top: 0.5rem;
+        }
+
+        .card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .api-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .api-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .api-header label {
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .api-header a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .api-header a:hover {
+            text-decoration: underline;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            ring: 2px solid var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            background-color: #F3F4F6;
+        }
+
+        .usage-info {
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 1rem;
+        }
+
+        .error-message {
+            color: var(--error);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        #results {
+            display: none;
+            margin-top: 3rem;
+        }
+
+        .doc-output {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .doc-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+            border-bottom: 2px solid var(--text);
+            padding-bottom: 1rem;
+        }
+
+        .doc-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .doc-section h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .doc-section p {
+            white-space: pre-wrap;
+            color: #374151;
+        }
+
+        .doc-disclaimer {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-top: 3rem;
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .spinner {
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            margin-right: 0.75rem;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                max-width: 100%;
+            }
+            header, .card, .usage-info, .actions, .api-section {
+                display: none !important;
+            }
+            #results {
+                display: block !important;
+                margin-top: 0;
+            }
+            .doc-output {
+                border: none;
+                box-shadow: none;
+                padding: 0;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">AiDoc<span>Gen</span></div>
+            <p class="tagline">Generate professional documents in seconds — free</p>
+        </header>
+
+        <main class="card">
+            <div class="api-section">
+                <div class="api-header">
+                    <label for="apiKey">Paste your free Gemini API key</label>
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank">Get free key at aistudio.google.com</a>
+                </div>
+                <input type="password" id="apiKey" placeholder="Enter your API key here...">
+                <div id="apiError" class="error-message">Please add your Gemini API key above</div>
+            </div>
+
+            <div class="form-group">
+                <label for="docType">Select Document Type</label>
+                <select id="docType">
+                    <option value="nda">NDA (Non-Disclosure Agreement)</option>
+                    <option value="cover_letter">Cover Letter</option>
+                    <option value="rental">Rental Agreement</option>
+                    <option value="freelance">Freelance Contract</option>
+                    <option value="privacy">Privacy Policy</option>
+                    <option value="proposal">Project Proposal</option>
+                </select>
+            </div>
+
+            <div id="dynamicFields">
+                <!-- Fields will be injected here -->
+            </div>
+
+            <button id="generateBtn" class="btn btn-primary">
+                <span class="spinner" id="spinner"></span>
+                <span id="btnText">Generate Document</span>
+            </button>
+            
+            <div id="usageInfo" class="usage-info">3 free generations left today</div>
+            <div id="genError" class="error-message" style="text-align: center; margin-top: 1rem;"></div>
+        </main>
+
+        <section id="results">
+            <div class="doc-output" id="docContent">
+                <!-- Document content will be injected here -->
+            </div>
+            <div class="actions">
+                <button id="copyBtn" class="btn btn-outline">Copy to Clipboard</button>
+                <button id="printBtn" class="btn btn-outline">Download as PDF</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const docConfigs = {
+            nda: {
+                fields: [
+                    { id: 'partyA', label: 'Party A Name', placeholder: 'e.g. Acme Corp' },
+                    { id: 'partyB', label: 'Party B Name', placeholder: 'e.g. John Doe' },
+                    { id: 'purpose', label: 'Purpose of Disclosure', placeholder: 'e.g. Business partnership discussions' },
+                    { id: 'duration', label: 'Duration (months)', placeholder: 'e.g. 24', type: 'number' },
+                    { id: 'jurisdiction', label: 'Jurisdiction (Country/State)', placeholder: 'e.g. New York, USA' }
+                ]
+            },
+            cover_letter: {
+                fields: [
+                    { id: 'name', label: 'Applicant Full Name', placeholder: 'e.g. Jane Smith' },
+                    { id: 'jobTitle', label: 'Job Title', placeholder: 'e.g. Senior Software Engineer' },
+                    { id: 'company', label: 'Company Name', placeholder: 'e.g. TechFlow Inc' },
+                    { id: 'skills', label: 'Top 3 Skills (comma separated)', placeholder: 'e.g. React, Node.js, AWS' },
+                    { id: 'achievement', label: 'One Key Achievement', placeholder: 'e.g. Led a team to reduce server costs by 30%' },
+                    { id: 'tone', label: 'Tone', type: 'select', options: ['Formal', 'Friendly'] }
+                ]
+            },
+            rental: {
+                fields: [
+                    { id: 'landlord', label: 'Landlord Name', placeholder: 'e.g. Robert Wilson' },
+                    { id: 'tenant', label: 'Tenant Name', placeholder: 'e.g. Alice Johnson' },
+                    { id: 'address', label: 'Property Address', placeholder: 'e.g. 123 Maple St, Apt 4B' },
+                    { id: 'rent', label: 'Monthly Rent ($)', placeholder: 'e.g. 1500', type: 'number' },
+                    { id: 'deposit', label: 'Deposit Amount ($)', placeholder: 'e.g. 1500', type: 'number' },
+                    { id: 'duration', label: 'Lease Duration (months)', placeholder: 'e.g. 12', type: 'number' },
+                    { id: 'country', label: 'Country', placeholder: 'e.g. Canada' }
+                ]
+            },
+            freelance: {
+                fields: [
+                    { id: 'freelancer', label: 'Freelancer Name', placeholder: 'e.g. David Miller' },
+                    { id: 'client', label: 'Client Name', placeholder: 'e.g. Global Solutions Ltd' },
+                    { id: 'project', label: 'Project Description', placeholder: 'e.g. Website redesign and SEO optimization' },
+                    { id: 'fee', label: 'Total Fee ($)', placeholder: 'e.g. 5000', type: 'number' },
+                    { id: 'terms', label: 'Payment Terms', placeholder: 'e.g. 50% upfront, 50% on completion' },
+                    { id: 'revisions', label: 'Number of Revision Rounds', placeholder: 'e.g. 3', type: 'number' },
+                    { id: 'deadline', label: 'Project Deadline', placeholder: 'e.g. June 30, 2024' }
+                ]
+            },
+            privacy: {
+                fields: [
+                    { id: 'company', label: 'Company/Website Name', placeholder: 'e.g. MyAwesomeApp' },
+                    { id: 'url', label: 'Website URL', placeholder: 'e.g. https://myawesomeapp.com' },
+                    { id: 'dataTypes', label: 'Types of Data Collected', placeholder: 'e.g. Email, IP address, Cookies' },
+                    { id: 'email', label: 'Contact Email', placeholder: 'e.g. privacy@myawesomeapp.com' },
+                    { id: 'country', label: 'Country', placeholder: 'e.g. United Kingdom' }
+                ]
+            },
+            proposal: {
+                fields: [
+                    { id: 'provider', label: 'Your Name / Company', placeholder: 'e.g. Creative Minds Studio' },
+                    { id: 'client', label: 'Client Name', placeholder: 'e.g. Sunrise Retail' },
+                    { id: 'title', label: 'Project Title', placeholder: 'e.g. E-commerce Platform Development' },
+                    { id: 'description', label: 'Project Description', placeholder: 'e.g. Building a custom Shopify store with inventory sync' },
+                    { id: 'budget', label: 'Estimated Budget ($)', placeholder: 'e.g. 12000', type: 'number' },
+                    { id: 'timeline', label: 'Estimated Timeline', placeholder: 'e.g. 3 months' },
+                    { id: 'deliverables', label: 'Key Deliverables (comma separated)', placeholder: 'e.g. UI Design, Backend API, Mobile App' }
+                ]
+            }
+        };
+
+        // DOM Elements
+        const apiKeyInput = document.getElementById('apiKey');
+        const apiError = document.getElementById('apiError');
+        const docTypeSelect = document.getElementById('docType');
+        const dynamicFields = document.getElementById('dynamicFields');
+        const generateBtn = document.getElementById('generateBtn');
+        const spinner = document.getElementById('spinner');
+        const btnText = document.getElementById('btnText');
+        const usageInfo = document.getElementById('usageInfo');
+        const genError = document.getElementById('genError');
+        const resultsSection = document.getElementById('results');
+        const docContent = document.getElementById('docContent');
+        const copyBtn = document.getElementById('copyBtn');
+        const printBtn = document.getElementById('printBtn');
+
+        // State
+        let currentUsage = 0;
+        let lastUsageDate = '';
+
+        // Initialize
+        function init() {
+            // Load API Key
+            const savedKey = localStorage.getItem('gemini_api_key');
+            if (savedKey) apiKeyInput.value = savedKey;
+
+            // Load Usage
+            const savedUsage = JSON.parse(localStorage.getItem('docgen_usage') || '{}');
+            const today = new Date().toISOString().split('T')[0];
+            
+            if (savedUsage.date === today) {
+                currentUsage = savedUsage.count || 0;
+            } else {
+                currentUsage = 0;
+            }
+            lastUsageDate = today;
+            updateUsageUI();
+
+            // Render initial fields
+            renderFields();
+        }
+
+        function updateUsageUI() {
+            const remaining = Math.max(0, 3 - currentUsage);
+            usageInfo.textContent = `${remaining} free generation${remaining !== 1 ? 's' : ''} left today`;
+            
+            if (currentUsage >= 3) {
+                generateBtn.disabled = true;
+                usageInfo.textContent = "Daily limit reached. Come back tomorrow!";
+                usageInfo.style.color = "var(--error)";
+            }
+        }
+
+        function saveUsage() {
+            localStorage.setItem('docgen_usage', JSON.stringify({
+                date: lastUsageDate,
+                count: currentUsage
+            }));
+            updateUsageUI();
+        }
+
+        function renderFields() {
+            const type = docTypeSelect.value;
+            const config = docConfigs[type];
+            dynamicFields.innerHTML = '';
+
+            config.fields.forEach(field => {
+                const div = document.createElement('div');
+                div.className = 'form-group';
+                
+                const label = document.createElement('label');
+                label.textContent = field.label;
+                div.appendChild(label);
+
+                if (field.type === 'select') {
+                    const select = document.createElement('select');
+                    select.id = field.id;
+                    field.options.forEach(opt => {
+                        const o = document.createElement('option');
+                        o.value = opt.toLowerCase();
+                        o.textContent = opt;
+                        select.appendChild(o);
+                    });
+                    div.appendChild(select);
+                } else {
+                    const input = document.createElement('input');
+                    input.id = field.id;
+                    input.type = field.type || 'text';
+                    input.placeholder = field.placeholder;
+                    input.required = true;
+                    div.appendChild(input);
+                }
+
+                dynamicFields.appendChild(div);
+            });
+        }
+
+        // Event Listeners
+        docTypeSelect.addEventListener('change', renderFields);
+        apiKeyInput.addEventListener('input', () => {
+            localStorage.setItem('gemini_api_key', apiKeyInput.value);
+            apiError.style.display = 'none';
+        });
+
+        generateBtn.addEventListener('click', async () => {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) {
+                apiError.style.display = 'block';
+                return;
+            }
+
+            if (currentUsage >= 3) return;
+
+            // Validate fields
+            const inputs = dynamicFields.querySelectorAll('input, select');
+            const data = {};
+            let isValid = true;
+            inputs.forEach(input => {
+                if (!input.value) {
+                    input.style.borderColor = 'var(--error)';
+                    isValid = false;
+                } else {
+                    input.style.borderColor = 'var(--border)';
+                    data[input.id] = input.value;
+                }
+            });
+
+            if (!isValid) return;
+
+            // Start Generation
+            setLoading(true);
+            genError.style.display = 'none';
+            resultsSection.style.display = 'none';
+
+            try {
+                const docTypeLabel = docTypeSelect.options[docTypeSelect.selectedIndex].text;
+                const prompt = `Generate a professional, legally appropriate ${docTypeLabel} based on the following details:
+                ${JSON.stringify(data)}
+                
+                Return ONLY valid JSON in this exact format:
+                {
+                  "title": "string",
+                  "sections": [
+                    { "heading": "string", "content": "string (use \\n for paragraph breaks)" }
+                  ],
+                  "disclaimer": "string"
+                }
+                
+                Ensure the content is high quality, professional, and comprehensive. Use \\n for new paragraphs within a section.`;
+
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: {
+                            temperature: 0.3,
+                            responseMimeType: "application/json"
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error?.message || 'API request failed');
+                }
+
+                const result = await response.json();
+                let text = result.candidates[0].content.parts[0].text;
+                
+                // Clean markdown fences if present
+                text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+                
+                const docData = JSON.parse(text);
+                displayDocument(docData);
+                
+                currentUsage++;
+                saveUsage();
+            } catch (err) {
+                console.error('Generation failed:', err);
+                genError.textContent = "Generation failed — please try again. Check console for details.";
+                genError.style.display = 'block';
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        function setLoading(isLoading) {
+            generateBtn.disabled = isLoading;
+            spinner.style.display = isLoading ? 'inline-block' : 'none';
+            btnText.textContent = isLoading ? 'Generating your document...' : 'Generate Document';
+        }
+
+        function displayDocument(doc) {
+            docContent.innerHTML = '';
+            
+            const title = document.createElement('h1');
+            title.className = 'doc-title';
+            title.textContent = doc.title;
+            docContent.appendChild(title);
+
+            doc.sections.forEach(section => {
+                const div = document.createElement('div');
+                div.className = 'doc-section';
+                
+                const h3 = document.createElement('h3');
+                h3.textContent = section.heading;
+                div.appendChild(h3);
+
+                const p = document.createElement('p');
+                p.textContent = section.content;
+                div.appendChild(p);
+
+                docContent.appendChild(div);
+            });
+
+            const disclaimer = document.createElement('div');
+            disclaimer.className = 'doc-disclaimer';
+            disclaimer.textContent = doc.disclaimer;
+            docContent.appendChild(disclaimer);
+
+            resultsSection.style.display = 'block';
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        copyBtn.addEventListener('click', () => {
+            const title = docContent.querySelector('.doc-title').textContent;
+            const sections = Array.from(docContent.querySelectorAll('.doc-section')).map(s => {
+                return `${s.querySelector('h3').textContent}\n${s.querySelector('p').textContent}`;
+            }).join('\n\n');
+            const disclaimer = docContent.querySelector('.doc-disclaimer').textContent;
+            
+            const fullText = `${title}\n\n${sections}\n\n${disclaimer}`;
+            
+            navigator.clipboard.writeText(fullText).then(() => {
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => copyBtn.textContent = originalText, 2000);
+            });
+        });
+
+        printBtn.addEventListener('click', () => {
+            window.print();
+        });
+
+        init();
+    </script>
+</body>
+</html>
